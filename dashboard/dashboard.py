@@ -76,8 +76,9 @@ def create_rfm(df):
     rfm.columns = ['customer_id', 'Recency', 'Frequency', 'Monetary']
     
     return rfm
-    
-all_df = pd.read_csv("all_df.csv")
+
+
+all_df = pd.read_csv("dashboard/all_df.csv")
 # Mengkonversi kolom datetime dengan format yang benar
 datetime_columns = ["order_approved_at", "order_estimated_delivery_date"]
 for column in datetime_columns:
