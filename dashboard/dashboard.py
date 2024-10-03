@@ -276,14 +276,18 @@ with col1:
     # Plot distribusi Recency
     sns.histplot(rfm_df['Recency'], kde=True, bins=20, color='blue', ax=axes[0])
     axes[0].set_title('Recency Distribution')
-
+    axes[0].set_xlabel(None)
+    
     # Plot distribusi Frequency
     sns.histplot(rfm_df['Frequency'], kde=True, bins=20, color='green', ax=axes[1])
     axes[1].set_title('Frequency Distribution')
-
+    axes[1].set_xlabel(None)
+    
     # Plot distribusi Monetary
     sns.histplot(rfm_df['Monetary'], kde=True, bins=20, color='red', ax=axes[2])
     axes[2].set_title('Monetary Distribution')
+    axes[2].set_xlabel(None)
+    
 
     # Mengatur layout plot
     plt.tight_layout()
