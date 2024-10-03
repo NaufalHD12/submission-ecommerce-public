@@ -290,7 +290,7 @@ with col1:
     
     # Mengatur layout plot
     plt.tight_layout()
-    plt.subplots_adjust(hspace=1.5)  # Menambah jarak antar axes
+    plt.subplots_adjust(hspace=1.0)  # Menambah jarak antar axes
     
     # Tampilkan plot ke dalam Streamlit
     st.pyplot(fig)
