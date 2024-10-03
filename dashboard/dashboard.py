@@ -324,3 +324,5 @@ with st.expander("See Explanation", expanded=False):
         st.write("""
         Scatter Plot (Frequency vs. Monetary): The scatter plot of Frequency vs. Monetary shows that customers who make more than one transaction are almost nonexistent. Most customers only transact once, but there is one customer who generates an exceptionally large amount of revenue. Customers with lower recency (more recent transactions) tend to have lower monetary values, while customers with higher recency exhibit more varied monetary values, ranging from very small to very large amounts.
         """)
+
+st.caption('Copyright © Naufal Hadi Darmawan')
