@@ -288,10 +288,10 @@ with col1:
     axes[2].set_title('Monetary Distribution')
     axes[2].set_xlabel(None)
     
-
     # Mengatur layout plot
     plt.tight_layout()
-
+    plt.subplots_adjust(hspace=0.5)  # Menambah jarak antar axes
+    
     # Tampilkan plot ke dalam Streamlit
     st.pyplot(fig)
 
