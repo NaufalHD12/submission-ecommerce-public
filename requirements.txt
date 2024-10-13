@@ -1,6 +1,7 @@
---upgrade pip
-pandas==2.0.3
-matplotlib==3.7.2
-seaborn==0.13.2
-streamlit==1.39.0
-numpy>=1.25.0
+pandas
+matplotlib
+seaborn
+streamlit
+numpy
+babel
+scikit-surprise
