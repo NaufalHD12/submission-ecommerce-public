@@ -23,5 +23,5 @@ streamlit run dashboard.py
 
 ## Link to Dashboard app
 ```
-[streamlit run dashboard.py](https://submission-ecommerce-public-dtwvbgakmi3wdkutzwun8p.streamlit.app/)
+https://submission-ecommerce-public-dtwvbgakmi3wdkutzwun8p.streamlit.app/
 ```
