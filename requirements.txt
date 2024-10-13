@@ -1,7 +1,7 @@
 pandas==2.0.3
 matplotlib==3.7.2
-numpy
-streamlit==1.38.0
-babel==2.11.0
-scikit-surprise==1.1.4
-pip install scikit-surprise
+seaborn==0.12.2
+streamlit==1.26.0
+numpy==1.24.3
+babel==2.12.1
+scikit-surprise==1.1.3
