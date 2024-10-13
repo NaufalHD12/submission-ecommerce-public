@@ -1,5 +1,7 @@
-Babel
-matplotlib
 pandas
+matplotlib
 seaborn
 streamlit
+numpy
+babel
+scikit-surprise
