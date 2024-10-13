@@ -2,7 +2,7 @@
 
 ## Setup Environment - Anaconda
 ```
-conda create --name main-ds python=3.820
+conda create --name main-ds python=3.8.20
 conda activate main-ds
 pip install -r requirements.txt
 ```
