@@ -80,14 +80,27 @@ def create_rfm(df):
 min_date = all_df["order_approved_at"].min().date()
 max_date = all_df["order_approved_at"].max().date()
 
-# Sidebar for date range selection
-with st.sidebar:
-    start_date, end_date = st.date_input(
-        label="Time Span",
-        min_value=min_date,
-        max_value=max_date,
-        value=[min_date, max_date]
-    )
+# Sidebar
+st.sidebar.title("Dashboard Navigation")
+
+# Date range selection
+start_date, end_date = st.sidebar.date_input(
+    label="Time Span",
+    min_value=min_date,
+    max_value=max_date,
+    value=[min_date, max_date]
+)
+
+# Static Outline
+st.sidebar.header("List of Contents")
+st.sidebar.markdown("""
+- Daily Orders
+- Customers Demographics
+- Top Performing Products
+- Product Reviews
+- RFM Analysis
+- Product Recommendations
+""")
 
 # Filter data based on selected dates
 main_df = all_df[(all_df["order_approved_at"].dt.date >= start_date) & 
