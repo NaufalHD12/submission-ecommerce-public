@@ -2,6 +2,6 @@ pandas
 matplotlib
 seaborn
 streamlit
-numpy
+numpy<2.0.0
 babel
 scikit-surprise
