@@ -2,7 +2,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
+import numpy as np
 from babel.numbers import format_currency
+from surprise import Dataset, Reader, SVD
+from surprise.model_selection import train_test_split, cross_validate
 sns.set(style="dark")
 
 
@@ -109,6 +112,9 @@ bystate_df = create_by_state(main_df)
 products_orders_df = create_products_orders(main_df)
 product_reviews_df = create_product_reviews(main_df)
 rfm_df = create_rfm(main_df)
+
+product_reviews_df.head()
+products_orders_df.head()
 
 st.header("E-Commerce Public Dashboard :money_with_wings: :chart:")
 
@@ -328,5 +334,91 @@ with st.expander("See Explanation", expanded=False):
         st.write("""
         Scatter Plot (Frequency vs. Monetary): The scatter plot of Frequency vs. Monetary shows that customers who make more than one transaction are almost nonexistent. Most customers only transact once, but there is one customer who generates an exceptionally large amount of revenue. Customers with lower recency (more recent transactions) tend to have lower monetary values, while customers with higher recency exhibit more varied monetary values, ranging from very small to very large amounts.
         """)
+
+
+st.subheader("Product Recommendations")
+# Load the dataset
+df = all_df
+
+# Data Preprocessing
+df['order_purchase_timestamp'] = pd.to_datetime(df['order_purchase_timestamp'])
+df['order_delivered_customer_date'] = pd.to_datetime(df['order_delivered_customer_date'])
+
+# Handle missing values
+df = df.dropna(subset=['review_score'])
+
+# Create user-item interaction matrix
+user_item_df = df.groupby(['customer_unique_id', 'product_id'])['review_score'].mean().reset_index()
+
+# Prepare data for Surprise library
+reader = Reader(rating_scale=(1, 5))
+data = Dataset.load_from_df(user_item_df[['customer_unique_id', 'product_id', 'review_score']], reader)
+
+# Train-test split
+trainset, testset = train_test_split(data, test_size=0.25)
+
+# Initialize and train the model
+model = SVD()
+model.fit(trainset)
+
+# Evaluate the model using cross-validation
+cross_validate(model, data, measures=['RMSE', 'MAE'], cv=5, verbose=True)
+
+# Predict on test set and evaluate RMSE
+predictions = model.test(testset)
+
+def rmse(predictions):
+    return np.sqrt(np.mean([(true_r - est)**2 for _, _, true_r, est, _ in predictions]))
+
+rmse_val = rmse(predictions)
+st.write(f"RMSE on test set: {rmse_val}")
+
+# Visualization
+results = cross_validate(model, data, measures=['RMSE'], cv=5, return_train_measures=True)
+rmse_values = results['test_rmse']
+
+fig, ax = plt.subplots(figsize=(10, 6))
+sns.barplot(x=list(range(1, 6)), y=rmse_values, ax=ax)
+ax.set_xlabel('Fold Number')
+ax.set_ylabel('RMSE')
+ax.set_title('RMSE of Model Across 5 Folds')
+st.pyplot(fig)
+
+# Function to get top-5 product recommendations
+def get_top_5_recommendations(customer_id, model, product_ids):
+    top_5_products = []
+    for product in product_ids:
+        top_5_products.append((product, model.predict(customer_id, product).est))
+    return sorted(top_5_products, key=lambda x: x[1], reverse=True)[:5]
+
+# Get unique customer IDs
+customer_ids = user_item_df['customer_unique_id'].unique()
+
+# Allow user to select a customer ID
+selected_customer_id = st.selectbox("Select a Customer ID", customer_ids)
+
+if selected_customer_id:
+    product_ids = user_item_df['product_id'].unique()
+    top_5_products = get_top_5_recommendations(selected_customer_id, model, product_ids)
+    top_5_df = pd.DataFrame(top_5_products, columns=['Product ID', 'Estimated Rating'])
+    
+    st.write(f"Top 5 product recommendations for customer {selected_customer_id}:")
+    st.dataframe(top_5_df)
+
+    # Visualization of recommendations
+    fig, ax = plt.subplots(figsize=(10, 6))
+    sns.barplot(x='Estimated Rating', y='Product ID', data=top_5_df, ax=ax)
+    ax.set_title(f'Top 5 Product Recommendations for Customer {selected_customer_id}')
+    ax.set_xlabel('Estimated Rating')
+    ax.set_ylabel('Product ID')
+    st.pyplot(fig)
+
+# Conclusion
+st.write(f"""
+The collaborative filtering model built using SVD provides product recommendations based on user reviews and ratings.
+The model's performance was evaluated using RMSE across 5-fold cross-validation, with an average RMSE of {np.mean(rmse_values):.4f}.
+This indicates a reasonable predictive performance, although further improvements could be made by experimenting with 
+more advanced models or incorporating additional features like product categories or customer behavior trends.
+""")
 
 st.caption('Copyright © Naufal Hadi Darmawan')
