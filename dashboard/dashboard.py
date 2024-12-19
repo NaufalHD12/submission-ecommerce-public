@@ -284,156 +284,33 @@ with col2:
         Based on the chart, the "security_and_services" category is identified as the most underperforming product in terms of customer satisfaction, while the other categories also require attention. This suggests that the company may need to address specific issues or concerns within these product areas to improve customer ratings and overall satisfaction.
         """)
 
-# RFM Analysis Section
-st.subheader("RFM Analysis")
-col1, col2 = st.columns([2, 1])
+# Customer Segmentation (RFM Analysis)
+st.subheader("Customer Segmentation")
 
-with col1:
-    fig, axes = plt.subplots(3, 1, figsize=(16, 10))
-    
-    # Recency
-    sns.histplot(rfm_df['Recency'], kde=True, bins=20, color='blue', ax=axes[0])
-    axes[0].set_title('Recency Distribution')
-    axes[0].set_xlabel(None)
-    
-    # Frequency
-    sns.histplot(rfm_df['Frequency'], kde=True, bins=20, color='green', ax=axes[1])
-    axes[1].set_title('Frequency Distribution')
-    axes[1].set_xlabel(None)
-    
-    # Monetary
-    sns.histplot(rfm_df['Monetary'], kde=True, bins=20, color='red', ax=axes[2])
-    axes[2].set_title('Monetary Distribution')
-    axes[2].set_xlabel(None)
-    
-    plt.tight_layout()
-    plt.subplots_adjust(hspace=1.0)
-    st.pyplot(fig)
+# Define RFM segments with corresponding customer counts
+rfm_segments = {
+    'Loyal Customers': 50167,
+    'Best Customers': 29980,
+    'At Risk': 13737,
+    'Lost Customers': 1536
+}
 
-with col2:
-    st.write("""
-    **RFM Analysis** is a method used to segment customers based on three key metrics:
-    
-    - **Recency**: How long it has been since the customer last made a purchase.
-    - **Frequency**: How often the customer makes purchases.
-    - **Monetary**: How much money the customer has spent.
-    
-    The charts on the left show the distribution of each metric.
-    """)
+# Create a plot
+fig, ax = plt.subplots()
 
-with st.expander("See Explanation", expanded=False):
-    st.write("""
-    - **Recency Distribution**: The Recency histogram shows that many customers made their last transaction within the last 100 days. This indicates that many customers are relatively new to making purchases. As the days increase, the number of customers who have made transactions decreases, which suggests that the longer the time since the last transaction, the less likely the customers are to remain active.
+# Create a bar plot for the RFM segments
+sns.barplot(x=list(rfm_segments.keys()), y=list(rfm_segments.values()), palette='Set2', ax=ax)
 
-    - **Frequency Distribution**: The Frequency distribution shows that the majority of customers have only made one transaction. This means that most customers in the dataset have only transacted once. The lack of repeat transactions indicates low customer loyalty or a lack of recurring purchases.
+# Set plot title and labels
+ax.set_title("Customer Segments Distribution")
+ax.set_xlabel("Segment")
+ax.set_ylabel("Number of Customers")
 
-    - **Monetary Distribution**: The Monetary distribution reveals that most customers generate relatively small revenues. There are a few customers who generate very high amounts of revenue, but they are outliers compared to the overall customer population. This indicates that most of the revenue comes from a small number of high-spending customers, while the majority of customers generate small revenues per transaction.
-    """)
+# Rotate x-axis labels for better readability
+plt.xticks(rotation=45)
 
-# Scatter Plot: Frequency vs Monetary
-st.subheader("Scatter Plot: Frequency vs Monetary")
-fig, ax = plt.subplots(figsize=(10, 6))
-sns.scatterplot(data=rfm_df, x='Frequency', y='Monetary', hue='Recency', palette='cool', s=100, ax=ax)
-ax.set_title('Scatter Plot Frequency vs Monetary')
-ax.set_xlabel('Frequency')
-ax.set_ylabel('Monetary')
-plt.tight_layout()
+# Display the plot in the Streamlit app
 st.pyplot(fig)
 
-with st.expander("See Explanation", expanded=False):
-    st.write("""
-    **Scatter Plot (Frequency vs. Monetary)**: The scatter plot of Frequency vs. Monetary shows that customers who make more than one transaction are almost nonexistent. Most customers only transact once, but there is one customer who generates an exceptionally large amount of revenue. Customers with lower recency (more recent transactions) tend to have lower monetary values, while customers with higher recency exhibit more varied monetary values, ranging from very small to very large amounts.
-    """)
-
-# Product Recommendations Section
-st.subheader("Product Recommendations")
-
-@st.cache_resource
-def train_recommendation_model(df):
-    # Data Preprocessing
-    df = df.dropna(subset=['review_score'])
-    
-    # Create user-item interaction matrix
-    user_item_df = df.groupby(['customer_unique_id', 'product_id'])['review_score'].mean().reset_index()
-    
-    # Prepare data for Surprise library
-    reader = Reader(rating_scale=(1, 5))
-    data = Dataset.load_from_df(user_item_df[['customer_unique_id', 'product_id', 'review_score']], reader)
-    
-    # Train-test split
-    trainset, testset = train_test_split(data, test_size=0.25)
-    
-    # Initialize and train the model
-    model = SVD()
-    model.fit(trainset)
-    
-    return model, user_item_df
-
-model, user_item_df = train_recommendation_model(all_df)
-
-# Evaluate the model using cross-validation
-with st.spinner('Evaluating the recommendation model...'):
-    cv_results = cross_validate(model, Dataset.load_from_df(user_item_df[['customer_unique_id', 'product_id', 'review_score']], Reader(rating_scale=(1, 5))), measures=['RMSE', 'MAE'], cv=5, verbose=True)
-
-# Calculate average RMSE
-average_rmse = np.mean(cv_results['test_rmse'])
-st.write(f"**Average RMSE on cross-validation:** {average_rmse:.4f}")
-
-# Visualization of RMSE across folds
-fig, ax = plt.subplots(figsize=(10, 6))
-sns.barplot(x=list(range(1, 6)), y=cv_results['test_rmse'], ax=ax, palette='viridis')
-ax.set_xlabel('Fold Number')
-ax.set_ylabel('RMSE')
-ax.set_title('RMSE of Model Across 5 Folds')
-plt.tight_layout()
-st.pyplot(fig)
-
-# Function to get top-5 product recommendations
-def get_top_5_recommendations(customer_id, model, all_product_ids, user_item_df):
-    # Products the customer has already interacted with
-    interacted_products = user_item_df[user_item_df['customer_unique_id'] == customer_id]['product_id'].unique()
-    
-    # Products to recommend (excluding already interacted)
-    products_to_recommend = [prod for prod in all_product_ids if prod not in interacted_products]
-    
-    # Predict ratings for the remaining products
-    predictions = [model.predict(customer_id, prod).est for prod in products_to_recommend]
-    
-    # Get top 5 products with highest estimated ratings
-    top_5_indices = np.argsort(predictions)[-5:][::-1]
-    top_5_products = [(products_to_recommend[i], predictions[i]) for i in top_5_indices]
-    
-    return top_5_products
-
-# Get unique customer IDs
-customer_ids = user_item_df['customer_unique_id'].unique()
-
-# Allow user to select a customer ID
-selected_customer_id = st.selectbox("Select a Customer ID", customer_ids)
-
-if selected_customer_id:
-    all_product_ids = user_item_df['product_id'].unique()
-    top_5_products = get_top_5_recommendations(selected_customer_id, model, all_product_ids, user_item_df)
-    top_5_df = pd.DataFrame(top_5_products, columns=['Product ID', 'Estimated Rating'])
-    
-    st.write(f"**Top 5 product recommendations for customer {selected_customer_id}:**")
-    st.dataframe(top_5_df)
-    
-    # Visualization of recommendations
-    fig, ax = plt.subplots(figsize=(10, 6))
-    sns.barplot(x='Estimated Rating', y='Product ID', data=top_5_df, ax=ax, palette='coolwarm')
-    ax.set_title(f'Top 5 Product Recommendations for Customer {selected_customer_id}')
-    ax.set_xlabel('Estimated Rating')
-    ax.set_ylabel('Product ID')
-    plt.tight_layout()
-    st.pyplot(fig)
-
-    # Conclusion
-    st.write(f"""
-    The collaborative filtering model built using SVD provides product recommendations based on user reviews and ratings.
-    The model's performance was evaluated using cross-validation, resulting in an average RMSE of {average_rmse:.4f}.
-    This indicates a reasonable predictive performance, although further improvements could be made by experimenting with 
-    more advanced models or incorporating additional features like product categories or customer behavior trends.
-    """)
 
 st.caption('© Naufal Hadi Darmawan')
