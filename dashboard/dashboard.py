@@ -4,8 +4,6 @@ import seaborn as sns
 import streamlit as st
 import numpy as np
 from babel.numbers import format_currency
-from surprise import Dataset, Reader, SVD
-from surprise.model_selection import train_test_split, cross_validate
 
 # Set Seaborn style
 sns.set(style="dark")
@@ -187,7 +185,7 @@ with st.expander("See Explanation", expanded=False):
     """)
 
 # Top Performing Products Section
-st.subheader("Top 5 Best Worst Performing Product Categories by Number of Sales")
+st.subheader("Top 5 Best & Worst Performing Product Categories by Number of Sales")
 col1, col2 = st.columns(2)
 
 with col1:
