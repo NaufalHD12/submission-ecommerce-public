@@ -311,6 +311,9 @@ plt.xticks(rotation=45)
 
 # Display the plot in the Streamlit app
 st.pyplot(fig)
-
+with st.expander("See Explanation", expanded=False):
+        st.write("""
+        The RFM analysis reveals valuable insights into customer segmentation. The largest group, "Loyal Customers," represents over 50,000 customers who purchase frequently and are highly engaged, making them a key segment for retention strategies. "Best Customers," totaling around 30,000, are the most valuable due to their high spending and recent activity, and they should be prioritized for upselling and reward programs. The "At Risk" segment highlights customers who have not purchased recently, warranting re-engagement campaigns to prevent churn. Finally, the "Lost Customers" segment, though the smallest, represents customers who are inactive and may require strategic win-back efforts or can be deprioritized. These insights allow businesses to tailor their marketing strategies effectively, focusing on high-value customers while addressing potential churn.
+        """)
 
 st.caption('© Naufal Hadi Darmawan')
