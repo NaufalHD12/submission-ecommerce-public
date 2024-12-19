@@ -21,7 +21,7 @@ pip install -r requirements.txt
 streamlit run dashboard.py
 ```
 
-## **Link to Dashboard app**
+## **Link to this project Dashboard**
 ```
 https://submission-ecommerce-public-dtwvbgakmi3wdkutzwun8p.streamlit.app/
 ```
