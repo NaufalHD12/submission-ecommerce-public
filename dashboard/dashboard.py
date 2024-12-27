@@ -96,8 +96,7 @@ st.sidebar.markdown("""
 - Customers Demographics
 - Top Performing Products
 - Product Reviews
-- RFM Analysis
-- Product Recommendations
+- Customer Segmentation by RFM
 """)
 
 # Filter data based on selected dates
@@ -283,7 +282,7 @@ with col2:
         """)
 
 # Customer Segmentation (RFM Analysis)
-st.subheader("Customer Segmentation")
+st.subheader("Customer Segmentation by RFM")
 
 # Define RFM segments with corresponding customer counts
 rfm_segments = {
